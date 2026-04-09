@@ -43,11 +43,17 @@ function App() {
 
   return (
     <div className={`wall-env ${isDark ? "dark-theme" : ""}`}>
+      <div className="spiral-binder">
+        {[...Array(12)].map((_, i) => (
+          <div key={i} className="ring"></div>
+        ))}
+      </div>
+
       <div className="calendar-card">
         <div className="hero">
           <img src={image} alt="Month visual" />
-          <div className="hero-overlay">
-            <div className="year-nav">
+          <div className="hero-content">
+            <div className="year-box">
               <button
                 onClick={() => setViewDate((p) => ({ ...p, year: p.year - 1 }))}
               >
@@ -60,26 +66,25 @@ function App() {
                 +
               </button>
             </div>
+            <h2 className="overlay-month">{monthNames[viewDate.month]}</h2>
           </div>
-          <button className="theme-toggle" onClick={() => setIsDark(!isDark)}>
+          <button className="theme-btn" onClick={() => setIsDark(!isDark)}>
             {isDark ? "☀️ Light" : "🌙 Dark"}
           </button>
         </div>
 
-        <div className="calendar-content">
-          <header className="calendar-header">
-            <div className="nav-wrapper">
+        <div className="calendar-body">
+          <header className="body-header">
+            <div className="nav">
               <button
-                className="arrow"
                 onClick={() =>
                   setViewDate((p) => ({ ...p, month: p.month - 1 }))
                 }
               >
                 ❮
               </button>
-              <h2 className="visible-month">{monthNames[viewDate.month]}</h2>
+              <h3>{monthNames[viewDate.month]}</h3>
               <button
-                className="arrow"
                 onClick={() =>
                   setViewDate((p) => ({ ...p, month: p.month + 1 }))
                 }
@@ -88,37 +93,33 @@ function App() {
               </button>
             </div>
             <button
-              className="reset-btn"
+              className="reset-range"
               onClick={() => setRange({ start: null, end: null })}
             >
-              Reset
+              Reset Range
             </button>
           </header>
 
-          <div className="main-grid-layout">
-            <aside className="notes-section">
+          <div className="main-content">
+            <aside className="memos-area">
               <label>MEMOS</label>
-              <div className="notebook">
-                <textarea
-                  value={notes}
-                  onChange={(e) => {
-                    setNotes(e.target.value);
-                    localStorage.setItem(storageKey, e.target.value);
-                  }}
-                  placeholder="Plan your month..."
-                />
-              </div>
+              <textarea
+                value={notes}
+                onChange={(e) => {
+                  setNotes(e.target.value);
+                  localStorage.setItem(storageKey, e.target.value);
+                }}
+                placeholder="Monthly goals..."
+              />
             </aside>
 
-            <section className="grid-section">
-              <div className="days-header">
+            <section className="grid-area">
+              <div className="weekdays">
                 {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d) => (
-                  <div key={d} className="weekday">
-                    {d}
-                  </div>
+                  <div key={d}>{d}</div>
                 ))}
               </div>
-              <div className="grid">
+              <div className="days-grid">
                 {days.map((d, i) => {
                   const ts = new Date(
                     viewDate.year,
@@ -133,8 +134,8 @@ function App() {
                     range.end &&
                     ts > range.start &&
                     ts < range.end;
-
-                  // Today's Logic: April 8, 2026
+                  const isHoliday =
+                    d.currentMonth && HOLIDAYS[`${viewDate.month}-${d.day}`];
                   const isToday =
                     d.currentMonth &&
                     viewDate.year === 2026 &&
@@ -145,7 +146,7 @@ function App() {
                     <div
                       key={i}
                       onClick={() => handleDateClick(d.day, d.currentMonth)}
-                      className={`cell ${d.currentMonth ? "active" : "faded"} ${isSelected ? "selected" : ""} ${inRange ? "in-range" : ""} ${isToday ? "today" : ""}`}
+                      className={`day ${d.currentMonth ? "active" : "faded"} ${isSelected ? "sel" : ""} ${inRange ? "range" : ""} ${isToday ? "today" : ""} ${isHoliday ? "holi" : ""}`}
                     >
                       {d.day}
                     </div>
